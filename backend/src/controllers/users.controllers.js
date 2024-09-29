@@ -1,8 +1,8 @@
-//En este archivo genero el log in, verifico si el usuario existe y registro un nuevo usuario
+//En este archivo hago las funciones para registrar nuevos usuarios, logearse y Borrarlos. Trayendo la contraseña haseada y la función para firmar
 
 const { handleHashPassword, handleSignToken } = require('../helpers/helpers');
 //recibe funcion para hashear pass y funcion para generar el token
-const Client = require('../models/clients')
+const Users = require('../models/Users')
 //Traigo modelo con funciones para crear user, verificar si existe user y verificar pass de user
 
 require('dotenv').config()
@@ -23,8 +23,8 @@ const handleRegister = async (req, res) => {
         else {
             //función handleHashPassword con parametro email
             const passwordHashed = handleHashPassword(password);
-            //funcion VerificarUsuario con parametro email extraida del modelo client 
-            const verifyIfUser = await Client.VerificarUsuario(email)
+            //funcion VerificarUsuario con parametro email extraida del modelo users 
+            const verifyIfUser = await Users.VerificarUsuario(email)
 
             //si usuario existe
             if (verifyIfUser.exist) {
@@ -32,7 +32,7 @@ const handleRegister = async (req, res) => {
 
             //si no crea un usuario con estos parametros que te paso
             } else {
-                const response = await Client.CrearUsuario(email, passwordHashed, rol, lenguage); // Pasa rol y lenguage
+                const response = await Users.CrearUsuario(email, passwordHashed, rol, lenguage); // Pasa rol y lenguage
                 return res.status(200).json(response);
             }
         }
@@ -53,8 +53,8 @@ const handleLogin = async (req, res) => {
             //responde esto
         } else {
             // Si no, busca al usuario en la base de datos
-            const passwordMatch = await Client.VerificarPassword(email, password)
-            //const passwordMatch = ModeloClient.funciónVerificarPassword con parametros que obtuve del cuerpo de la solicitud
+            const passwordMatch = await Users.VerificarPassword(email, password)
+            //const passwordMatch = ModeloUsers.funciónVerificarPassword con parametros que obtuve del cuerpo de la solicitud
            
             if (passwordMatch.match) {
             //la funcion VerificarPassword tiene una propiedad match que me indica si la contraseña coincide o no
@@ -81,7 +81,7 @@ const handleGetUser = async (req, res) => {
         const { email } = req.user;
 
         // Buscamos al usuario en la base de datos
-        const user = await Client.FindByEmail(email);
+        const user = await Users.FindByEmail(email);
 
         if (!user) {
             return res.status(404).json({ msg: 'Usuario no encontrado' });
@@ -113,7 +113,7 @@ const handleGetUser = async (req, res) => {
 //         const { email } = decoded;  
 //         console.log('Email decodificado:', email);
 
-//         let response = await Client.Delete(id);
+//         let response = await Users.Delete(id);
 //         response['msg'] = `El usuario ${email} acaba de eliminar a ${response.data.email}`;
 
 //         res.status(200).json(response);
@@ -134,7 +134,7 @@ const handleDeleteUser = async (req, res) => {
         const { email } = req.user;  // Extrae el email del token decodificado
 
         // Aquí deberías manejar la lógica de eliminar el usuario con el ID dado
-        const response = await Client.Delete(id);
+        const response = await Users.Delete(id);
 
         // Mensaje de respuesta
         res.status(200).json({ msg: `El usuario ${email} ha eliminado al usuario con ID ${id}` });
